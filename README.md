@@ -8,7 +8,7 @@ The idea of this repository is to give an example of using a dockerfile to creat
 2. add your requirements.txt file or update the existing one with your requirements.
 
 The folders should have this structure:
-
+```
 github_project_root
 ├── LICENSE
 ├── README.md
@@ -17,6 +17,7 @@ github_project_root
 ├── notebooks
 │   └── testing pyspark.ipynb
 └── requirements.txt
+```
 
 # How to run the code:
 
