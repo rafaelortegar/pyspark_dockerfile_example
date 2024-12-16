@@ -1,0 +1,51 @@
+FROM python:3.10
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    bash \
+    build-essential \
+    curl \
+    wget \
+    openjdk-17-jre-headless && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set environment variables for Java and PySpark
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
+ENV SPARK_VERSION=3.4.1
+ENV HADOOP_VERSION=3
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$SPARK_HOME/bin:$SPARK_HOME/sbin:$PATH
+ENV PYSPARK_PYTHON=/env/bin/python
+ENV PYSPARK_DRIVER_PYTHON=/env/bin/python
+
+# Install virtualenv
+RUN pip install --no-cache-dir virtualenv
+
+# Create a Python virtual environment
+RUN python -m virtualenv /env
+
+# Copy requirements.txt into the container
+COPY requirements.txt /requirements.txt
+
+# Install Python dependencies in the virtual environment
+RUN /env/bin/pip install --no-cache-dir -r /requirements.txt
+
+# Download and install Apache Spark
+RUN wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+    tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz -C /opt && \
+    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} /opt/spark && \
+    rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
+
+# Create a directory for notebooks
+RUN mkdir /notebooks
+
+# Set the working directory
+WORKDIR /notebooks
+
+# Expose the port for Jupyter Notebook
+EXPOSE 8888
+
+# Default command to run bash, with Jupyter as an option
+CMD ["bash"]
